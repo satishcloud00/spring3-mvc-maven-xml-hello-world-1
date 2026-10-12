@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     // Let's clone the source
-                    git 'https://github.com/betawins/spring3-mvc-maven-xml-hello-world-1.git';
+                    git 'git 'https://github.com/satishcloud00/spring3-mvc-maven-xml-hello-world-1.git'';
                 }
             }
         }
