@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                git 'https://github.com/betawins/spring3-mvc-maven-xml-hello-world-1.git'
+                git 'https://github.com/satishcloud00/spring3-mvc-maven-xml-hello-world-1.git'
             }
         }
 
