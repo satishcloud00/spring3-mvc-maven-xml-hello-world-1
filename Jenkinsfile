@@ -53,7 +53,7 @@ pipeline {
                         -Dpackaging=${packaging} \
                         -Dfile=target/${artifactId}-${version}.war \
                         -DrepositoryId=nexus \
-                        -Durl=http://YOUR_NEXUS_HOST:8081/repository/YOUR_MAVEN_REPOSITORY/
+                        -Durl=http://172.31.31.140:8081/repository/maven-releases/
                     """
                 }
             }
