@@ -2,65 +2,59 @@ pipeline {
     agent any
 
     tools {
-        maven "MVN_HOME"
-    }
-
-    environment {
-        NEXUS_VERSION = "nexus3"
-        NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "3.133.145.136:8081"
-        NEXUS_REPOSITORY = "devops"
-        NEXUS_CREDENTIAL_ID = "Nexus_server"
+        maven 'Maven'
+        jdk 'JDK8'
     }
 
     stages {
-        stage("clone code") {
+        stage('Checkout SCM') {
             steps {
-                git 'https://github.com/satishcloud00/spring3-mvc-maven-xml-hello-world-1.git'
+                git 'https://github.com/betawins/spring3-mvc-maven-xml-hello-world-1.git'
             }
         }
 
-        stage("mvn build") {
+        stage('Tool Install') {
             steps {
-                sh 'mvn -Dmaven.test.failure.ignore=true clean install'
+                sh 'mvn -version'
+                sh 'java -version'
             }
         }
 
-        stage("publish to nexus") {
+        stage('Clone Code') {
+            steps {
+                echo 'Source code checked out successfully'
+                sh 'ls -la'
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Publish to Nexus') {
             steps {
                 script {
-                    def pom = readMavenPom file: "pom.xml"
-                    def artifactPath = "target/${pom.artifactId}-${pom.version}.${pom.packaging}"
+                    def groupId = 'com.ncodeit'
+                    def artifactId = 'ncodeit-hello-world'
+                    def version = '3.0'
+                    def packaging = 'war'
 
-                    if (fileExists(artifactPath)) {
-                        echo "Uploading ${artifactPath} to Nexus"
+                    echo "Group ID: ${groupId}"
+                    echo "Artifact ID: ${artifactId}"
+                    echo "Version: ${version}"
 
-                        nexusArtifactUploader(
-                            nexusVersion: NEXUS_VERSION,
-                            protocol: NEXUS_PROTOCOL,
-                            nexusUrl: NEXUS_URL,
-                            groupId: pom.groupId,
-                            version: pom.version,
-                            repository: NEXUS_REPOSITORY,
-                            credentialsId: NEXUS_CREDENTIAL_ID,
-                            artifacts: [
-                                [
-                                    artifactId: pom.artifactId,
-                                    classifier: '',
-                                    file: artifactPath,
-                                    type: pom.packaging
-                                ],
-                                [
-                                    artifactId: pom.artifactId,
-                                    classifier: '',
-                                    file: "pom.xml",
-                                    type: "pom"
-                                ]
-                            ]
-                        )
-                    } else {
-                        error "Artifact not found: ${artifactPath}"
-                    }
+                    sh """
+                        mvn deploy:deploy-file \
+                        -DgroupId=${groupId} \
+                        -DartifactId=${artifactId} \
+                        -Dversion=${version} \
+                        -Dpackaging=${packaging} \
+                        -Dfile=target/${artifactId}-${version}.war \
+                        -DrepositoryId=nexus \
+                        -Durl=http://YOUR_NEXUS_HOST:8081/repository/YOUR_MAVEN_REPOSITORY/
+                    """
                 }
             }
         }
